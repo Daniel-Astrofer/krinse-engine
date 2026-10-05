@@ -1,8 +1,17 @@
 rootProject.name = "kerosene-kfe"
 
-val contractsDirectory = providers.environmentVariable("KEROSENE_CONTRACTS_DIR")
-    .orElse("../kerosene-contracts")
-    .get()
+fun resolveCompositeBuild(environmentVariable: String, vararg candidates: String): String =
+    providers.environmentVariable(environmentVariable).orNull?.takeIf { it.isNotBlank() }
+        ?: candidates.firstOrNull { file(it).isDirectory }
+        ?: candidates.first()
+
+val contractsDirectory = resolveCompositeBuild(
+    "KEROSENE_CONTRACTS_DIR",
+    "../contracts",
+    "../kerosene-contracts",
+    "../../platform/kerosene-contracts",
+    "../../platform/contracts",
+)
 
 includeBuild(contractsDirectory) {
     dependencySubstitution {
@@ -11,9 +20,13 @@ includeBuild(contractsDirectory) {
     }
 }
 
-val sharedDirectory = providers.environmentVariable("KEROSENE_SHARED_DIR")
-    .orElse("../kerosene-shared")
-    .get()
+val sharedDirectory = resolveCompositeBuild(
+    "KEROSENE_SHARED_DIR",
+    "../shared",
+    "../kerosene-shared",
+    "../../platform/kerosene-shared",
+    "../../platform/shared",
+)
 
 includeBuild(sharedDirectory) {
     dependencySubstitution {

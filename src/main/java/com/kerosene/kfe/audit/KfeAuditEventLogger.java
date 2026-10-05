@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import com.kerosene.common.infra.logging.StructuredLogEvent;
-import com.kerosene.kfe.domain.KfeAuditEvent;
+import com.kerosene.kfe.audit.domain.KfeAuditEvent;
 
 import java.util.UUID;
 
@@ -25,10 +25,22 @@ import java.util.UUID;
 @Component
 public class KfeAuditEventLogger {
 
+    /** Dedicated structured-log category for sanitized financial audit metadata. */
     private static final Logger log = LoggerFactory.getLogger("kerosene.audit.financial");
 
     // --- State machine transitions ---
 
+    /**
+     * Emits an audit event describing a transaction state transition and its amount/rail context.
+     *
+     * @param eventType stable audit event type
+     * @param transactionId affected transaction identifier
+     * @param walletId associated wallet identifier
+     * @param previousStatus state before transition
+     * @param newStatus state after transition
+     * @param amountSats transaction amount in satoshis
+     * @param rail payment rail label
+     */
     public void logStateTransition(
             String eventType,
             UUID transactionId,
@@ -51,6 +63,18 @@ public class KfeAuditEventLogger {
 
     // --- Settlement operations ---
 
+    /**
+     * Emits settlement metadata without recording invoice, transaction, or signing payloads.
+     *
+     * @param eventType stable audit event type
+     * @param transactionId settled transaction identifier
+     * @param walletId associated wallet identifier
+     * @param amountSats settled amount in satoshis
+     * @param feeSats network/provider fee in satoshis
+     * @param network blockchain/network label
+     * @param rail payment rail label
+     * @param referenceHash sanitized hash of the external settlement reference
+     */
     public void logSettlement(
             String eventType,
             UUID transactionId,
@@ -75,6 +99,16 @@ public class KfeAuditEventLogger {
 
     // --- Conflict / reorg events ---
 
+    /**
+     * Emits a conflict event with the sanitized reason and external reference hash.
+     *
+     * @param eventType stable audit event type
+     * @param transactionId affected transaction identifier
+     * @param walletId associated wallet identifier
+     * @param referenceHash hash of the conflicting external reference
+     * @param reason conflict classification stored as the previous-status field
+     * @param rail payment rail label
+     */
     public void logConflict(
             String eventType,
             UUID transactionId,
@@ -93,6 +127,15 @@ public class KfeAuditEventLogger {
         emit(event);
     }
 
+    /**
+     * Emits a chain reorganization event with the previous and newly observed confirmations.
+     *
+     * @param transactionId affected transaction identifier
+     * @param walletId associated wallet identifier
+     * @param previousConfirmations last recorded confirmation count
+     * @param currentConfirmations newly observed confirmation count
+     * @param rail payment rail label
+     */
     public void logReorg(
             UUID transactionId,
             UUID walletId,
@@ -112,6 +155,15 @@ public class KfeAuditEventLogger {
 
     // --- Reconciliation operations ---
 
+    /**
+     * Emits a reconciliation event with the reason and rail context.
+     *
+     * @param eventType stable audit event type
+     * @param transactionId transaction being reconciled
+     * @param walletId associated wallet identifier
+     * @param reason reconciliation trigger or outcome classification
+     * @param rail payment rail label
+     */
     public void logReconciliation(
             String eventType,
             UUID transactionId,
@@ -130,10 +182,21 @@ public class KfeAuditEventLogger {
 
     // --- Generic ---
 
+    /**
+     * Emits an already-assembled audit event through the same sanitized structured-log projection.
+     *
+     * @param event event carrying financial audit metadata
+     */
     public void log(KfeAuditEvent event) {
         emit(event);
     }
 
+    /**
+     * Projects allowed event fields into structured logs and omits null/zero optional values.
+     * Sensitive secrets and payment payloads are intentionally excluded from this projection.
+     *
+     * @param event financial audit event to serialize
+     */
     private void emit(KfeAuditEvent event) {
         StructuredLogEvent structured = StructuredLogEvent.of(
                         event.eventType(),

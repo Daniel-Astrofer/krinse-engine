@@ -33,9 +33,14 @@ public class WorkloadIdentityConfiguration {
     InternalServiceRestTemplateFactory internalServiceRestTemplateFactory(
             WorkloadIdentityProperties properties,
             ObjectProvider<SpiffeX509Identity> spiffeIdentity,
-            @Value("${kfe.internal.shared-secret:}") String legacySecret) {
+            @Value("${kfe.internal.shared-secret:}") String legacySecret,
+            @Value("${release.manifest.path:}") String manifestPath,
+            @Value("${release.attestation.shared-secret:${RELEASE_ATTESTATION_SECRET:}}") String releaseSecret) {
         return new InternalServiceRestTemplateFactory(
-                properties.toConfig(), spiffeIdentity.getIfAvailable(), legacySecret);
+                properties.toConfig(), spiffeIdentity.getIfAvailable(), legacySecret,
+                manifestPath.isBlank() ? java.util.List.of() : java.util.List.of(
+                        new com.kerosene.common.security.workload.ReleaseAttestationRequestInterceptor(
+                                manifestPath, releaseSecret, properties.toConfig().ownSpiffeId())));
     }
 
     @Bean

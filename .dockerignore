@@ -1,7 +1,0 @@
-.git
-.github
-.gradle
-build
-docs
-*.log
-.env

@@ -75,7 +75,7 @@ dependencies {
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     archiveClassifier.set("boot")
-    mainClass.set("com.kerosene.kfe.runtime.KfeServiceApplication")
+    mainClass.set("com.kerosene.kfe.bootstrap.KfeServiceApplication")
 }
 
 tasks.named<Jar>("jar") {
@@ -84,4 +84,37 @@ tasks.named<Jar>("jar") {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.register<Test>("paymentCancellationPostgresTest") {
+    description = "Verify cancellation fencing against a dedicated disposable PostgreSQL database."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter {
+        includeTestsMatching("*PaymentCancellationPostgresTest")
+    }
+    // Each invocation uses a fresh external fixture; never reuse another database's result.
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+    doFirst {
+        require(!System.getenv("KFE_TEST_POSTGRES_URL").isNullOrBlank()) {
+            "Run bash scripts/test-payment-cancellation-postgres.sh to create the isolated database."
+        }
+    }
+}
+
+tasks.register<Test>("ledgerPostgresTest") {
+    description = "Verify extracted ledger adapters against a disposable PostgreSQL database."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter { includeTestsMatching("*LedgerPostgresTest") }
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+    doFirst {
+        require(!System.getenv("KFE_LEDGER_POSTGRES_URL").isNullOrBlank()) {
+            "Set KFE_LEDGER_POSTGRES_URL to a disposable PostgreSQL JDBC URL."
+        }
+    }
 }

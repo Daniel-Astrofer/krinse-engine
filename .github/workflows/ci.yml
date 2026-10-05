@@ -8,26 +8,41 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   java:
-    runs-on: ubuntu-latest
+    name: Verify KFE
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: kerosene-kfe
-      - uses: actions/checkout@v4
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: Daniel-Astrofer/kerosene-contracts
+          repository: Daniel-Astrofer/contracts
           path: kerosene-contracts
-      - uses: actions/checkout@v4
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: Daniel-Astrofer/kerosene-shared
+          repository: Daniel-Astrofer/shared
           path: kerosene-shared
-      - uses: actions/setup-java@v4
+          persist-credentials: false
+      - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5.6.0
         with:
           distribution: temurin
           java-version: "21"
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
       - name: Verify KFE
         working-directory: kerosene-kfe
         run: ./gradlew check --no-daemon
+
+  security:
+    permissions:
+      contents: read
+      pull-requests: read # Required by dependency review on pull requests.
+      security-events: write # Required to upload SARIF security findings.
+    uses: Daniel-Astrofer/.github/.github/workflows/security-scan.yml@2552ff2125c2d72accebe93804b8e139a52ded13
