@@ -1,0 +1,2 @@
+ALTER TABLE financial.balance_movements
+    ADD COLUMN IF NOT EXISTS asset VARCHAR(10) NOT NULL DEFAULT 'BTC';
