@@ -96,7 +96,7 @@ class KfeKeroseneNodeDirectoryTest {
         expectRoster(server, B, "test");
         var directory = new KfeKeroseneNodeDirectory(client, new com.fasterxml.jackson.databind.ObjectMapper(),
                 List.of(A, B), "test");
-        directory.requireAuthorized(List.of(B.replace(":8800", ":7701")));
+        directory.requireAuthorized(List.of(B.replace(":8800", ":7801")));
         server.verify();
     }
 

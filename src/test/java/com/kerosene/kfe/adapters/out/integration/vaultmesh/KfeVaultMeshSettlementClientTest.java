@@ -79,7 +79,7 @@ class KfeVaultMeshSettlementClientTest {
     private static VaultMeshDayAdvanceResult advanceMesh(
             List<String> readbackDays, int failedPost, boolean lostReply) throws Exception {
         List<String> members = List.of(
-                "https://vault-1.test:7701", "https://vault-2.test:7701", "https://vault-3.test:7701");
+                "https://vault-1.test:7801", "https://vault-2.test:7801", "https://vault-3.test:7801");
         KfeVaultMeshSettlementClient client = new KfeVaultMeshSettlementClient(
                 new RestTemplateBuilder(), new ObjectMapper(), members.getFirst(), 1000L, 1000L, "",
                 false, "", "", "", "", "", "PKCS12", "", "", "PKCS12", true,
@@ -167,7 +167,7 @@ class KfeVaultMeshSettlementClientTest {
         KfeVaultMeshSettlementClient client = client();
         MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate(client));
 
-        server.expect(requestTo("https://vault.test:7701/v1/bitcoin/deposit?bucket=USERS"))
+        server.expect(requestTo("https://vault.test:7801/v1/bitcoin/deposit?bucket=USERS"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(
                         """
@@ -185,7 +185,7 @@ class KfeVaultMeshSettlementClientTest {
         KfeVaultMeshSettlementClient client = client();
         MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate(client));
 
-        server.expect(requestTo("https://vault.test:7701/v1/bitcoin/deposit?bucket=USERS"))
+        server.expect(requestTo("https://vault.test:7801/v1/bitcoin/deposit?bucket=USERS"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(
                         """
@@ -204,7 +204,7 @@ class KfeVaultMeshSettlementClientTest {
     void getDayStatusMapsCurrentEpoch() throws Exception {
         KfeVaultMeshSettlementClient client = client();
         MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate(client));
-        server.expect(requestTo("https://vault.test:7701/v1/day/current"))
+        server.expect(requestTo("https://vault.test:7801/v1/day/current"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(
                         "{\"day_epoch\":\"2099-01-01\"}", MediaType.APPLICATION_JSON));
@@ -220,7 +220,7 @@ class KfeVaultMeshSettlementClientTest {
     void getDayStatusMapsStaleConflict() throws Exception {
         KfeVaultMeshSettlementClient client = client();
         MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate(client));
-        server.expect(requestTo("https://vault.test:7701/v1/day/current"))
+        server.expect(requestTo("https://vault.test:7801/v1/day/current"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.CONFLICT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -240,14 +240,14 @@ class KfeVaultMeshSettlementClientTest {
         KfeVaultMeshSettlementClient client = client();
         MockRestServiceServer server = MockRestServiceServer.createServer(restTemplate(client));
 
-        server.expect(requestTo("https://vault.test:7701/v1/day/vote"))
+        server.expect(requestTo("https://vault.test:7801/v1/day/vote"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess("{\"ok\":true}", MediaType.APPLICATION_JSON));
-        server.expect(requestTo("https://vault.test:7701/v1/day/advance"))
+        server.expect(requestTo("https://vault.test:7801/v1/day/advance"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(
                         "{\"day_epoch\":\"2026-07-22\",\"advanced\":true}", MediaType.APPLICATION_JSON));
-        server.expect(requestTo("https://vault.test:7701/v1/reshare/trigger"))
+        server.expect(requestTo("https://vault.test:7801/v1/reshare/trigger"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withSuccess(
                         "{\"reshared\":true,\"policy\":\"daily\",\"reason\":\"kfe-day-rotation\"}",
@@ -270,7 +270,7 @@ class KfeVaultMeshSettlementClientTest {
         KfeVaultMeshSettlementClient client = new KfeVaultMeshSettlementClient(
                 new RestTemplateBuilder(),
                 new ObjectMapper(),
-                "https://vault.test:7701",
+                "https://vault.test:7801",
                 1000L,
                 1000L,
                 "",
@@ -288,7 +288,7 @@ class KfeVaultMeshSettlementClientTest {
                 "",
                 3,
                 2,
-                "https://vault.test:7701",
+                "https://vault.test:7801",
                 "direct",
                 "",
                 9050);
@@ -335,7 +335,7 @@ class KfeVaultMeshSettlementClientTest {
         assertThatThrownBy(() -> new KfeVaultMeshSettlementClient(
                         new RestTemplateBuilder(),
                         new ObjectMapper(),
-                        "https://vault.test:7701",
+                        "https://vault.test:7801",
                         1000L,
                         1000L,
                         "",
@@ -353,7 +353,7 @@ class KfeVaultMeshSettlementClientTest {
                         "",
                         3,
                         2,
-                        "https://vault.test:7701",
+                        "https://vault.test:7801",
                         "direct",
                         "",
                         9050))
@@ -426,7 +426,7 @@ class KfeVaultMeshSettlementClientTest {
         return new KfeVaultMeshSettlementClient(
                 new RestTemplateBuilder(),
                 new ObjectMapper(),
-                "https://vault.test:7701",
+                "https://vault.test:7801",
                 1000L,
                 1000L,
                 "");
